@@ -10,36 +10,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Setup NDK
-      uses: nttld/setup-ndk@v1
-      with:
-        ndk-version: r21e
-        
-    - name: Build ESP Library
-      run: |
-        export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT
-        cd jni
-        $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk
-        
-    - name: Upload Artifact
-    uses: actions/upload-artifact@v4
-      with:
-        name: libesp4399-${{ github.sha }}
-        path: libs/
-        
-    - name: Create Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v1.0-${{ github.run_number }}
-        name: ESP Build ${{ github.run_number }}
-        files: |
-          libs/arm64-v8a/libesp4399.so
-          libs/armeabi-v7a/libesp4399.so
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      - name: Build ESP Library
+        run: |
+          export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT
+          cd jni
+          $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libesp4399
+          path: jni/libs/
