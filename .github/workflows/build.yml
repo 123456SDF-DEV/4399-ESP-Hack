@@ -1,32 +1,28 @@
 name: Build 4399 ESP
-
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r21e
-
-      - name: Build ESP Library
+      - name: Setup Android NDK r25c
         run: |
-          export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT
-          cd jni
-          $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk
+          cd /usr/local/lib/android/sdk
+          curl -LO https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip -q android-ndk-r25c-linux.zip
+          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$PWD/android-ndk-r25c" >> $GITHUB_ENV
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Build
+        run: |
+          cd jni
+          $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk -j$(nproc)
+
+      - uses: actions/upload-artifact@v4
         with:
           name: libesp4399
           path: jni/libs/
